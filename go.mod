@@ -1,4 +1,4 @@
-module github.com/dwiilham/gin-firebase-backend
+module github.com/dwiilhammaulana/gin-firebase-backend
 
 go 1.26.1
 
