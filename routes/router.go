@@ -1,9 +1,9 @@
 package routes
 
 import (
-	"github.com/gin-gonic/gin"
 	"github.com/dwiilhammaulana/gin-firebase-backend/handlers"
 	"github.com/dwiilhammaulana/gin-firebase-backend/middleware"
+	"github.com/gin-gonic/gin"
 )
 
 func SetupRouter() *gin.Engine {
@@ -24,6 +24,8 @@ func SetupRouter() *gin.Engine {
 	// Init handlers
 	authHandler := handlers.NewAuthHandler()
 	productHandler := handlers.NewProductHandler()
+	cartHandler := handlers.NewCartHandler()
+	orderHandler := handlers.NewOrderHandler()
 
 	// API v1 group
 	v1 := r.Group("/v1")
@@ -46,6 +48,22 @@ func SetupRouter() *gin.Engine {
 		protected := v1.Group("")
 		protected.Use(middleware.AuthMiddleware())
 		{
+			cart := protected.Group("/cart")
+			{
+				cart.GET("", cartHandler.GetCart)
+				cart.POST("", cartHandler.AddToCart)
+				cart.PUT("/:id", cartHandler.UpdateItem)
+				cart.DELETE("/:id", cartHandler.RemoveItem)
+				cart.DELETE("", cartHandler.ClearCart)
+			}
+
+			orders := protected.Group("/orders")
+			{
+				orders.POST("/checkout", orderHandler.Checkout)
+				orders.GET("", orderHandler.GetMyOrders)
+				orders.GET("/:id", orderHandler.GetOrderDetail)
+			}
+
 			products := protected.Group("/products")
 			{
 				products.GET("", productHandler.GetAll)
