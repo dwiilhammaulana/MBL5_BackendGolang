@@ -1,6 +1,8 @@
 package repositories
 
 import (
+	"time"
+
 	"github.com/dwiilhammaulana/gin-firebase-backend/config"
 	"github.com/dwiilhammaulana/gin-firebase-backend/models"
 	"gorm.io/gorm"
@@ -57,6 +59,27 @@ func (r *OrderRepositoryTx) CreateOrderItems(items []models.OrderItem) error {
 
 func (r *OrderRepositoryTx) CreatePayment(payment *models.Payment) error {
 	return r.tx.Create(payment).Error
+}
+
+func (r *OrderRepositoryTx) MarkPaymentPaid(orderID uint) error {
+	now := time.Now()
+
+	if err := r.tx.Model(&models.Order{}).
+		Where("id = ?", orderID).
+		Updates(map[string]interface{}{
+			"status":         "processing",
+			"payment_status": "paid",
+			"paid_at":        &now,
+		}).Error; err != nil {
+		return err
+	}
+
+	return r.tx.Model(&models.Payment{}).
+		Where("order_id = ?", orderID).
+		Updates(map[string]interface{}{
+			"payment_status": "paid",
+			"paid_at":        &now,
+		}).Error
 }
 
 func (r *OrderRepositoryTx) DecreaseProductStock(productID uint, quantity int) (int64, error) {
