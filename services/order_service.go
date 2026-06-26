@@ -168,7 +168,10 @@ func (s *OrderService) GetOrderDetail(userID, orderID uint) (*models.OrderRespon
 }
 
 func isAllowedPaymentMethod(method string) bool {
-	return method == "gopay" || method == "bank_transfer" || method == "virtual_account"
+	return method == "gopay" ||
+		method == "bank_transfer" ||
+		method == "virtual_account" ||
+		method == "global_institute_pay"
 }
 
 func generatePaymentData(method string, userID uint) (*string, *string) {
@@ -180,6 +183,8 @@ func generatePaymentData(method string, userID uint) (*string, *string) {
 	case "gopay":
 		value := fmt.Sprintf("gopay://payment/order/%d/%d", userID, now)
 		return nil, &value
+	case "global_institute_pay":
+		return nil, nil
 	default:
 		return nil, nil
 	}
