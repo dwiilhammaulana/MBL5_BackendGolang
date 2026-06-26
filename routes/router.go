@@ -61,6 +61,7 @@ func SetupRouter() *gin.Engine {
 			{
 				orders.POST("/checkout", orderHandler.Checkout)
 				orders.GET("", orderHandler.GetMyOrders)
+				orders.POST("/:id/mark-paid", orderHandler.MarkPaymentPaid)
 				orders.GET("/:id", orderHandler.GetOrderDetail)
 			}
 
