@@ -27,7 +27,7 @@ func main() {
 	// 5. Jalankan server
 	port := os.Getenv("APP_PORT")
 	if port == "" {
-		port = "8080"
+		port = "8081"
 	}
 
 	log.Printf("Server berjalan di http://localhost:%s", port)
