@@ -167,6 +167,30 @@ func (s *OrderService) GetOrderDetail(userID, orderID uint) (*models.OrderRespon
 	return &response, nil
 }
 
+func (s *OrderService) MarkPaymentPaid(userID, orderID uint) (*models.OrderResponse, error) {
+	order, err := s.orderRepo.FindByIDAndUserID(orderID, userID)
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, ErrOrderNotFound
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	if err := config.DB.Transaction(func(tx *gorm.DB) error {
+		return s.orderRepo.WithTransaction(tx).MarkPaymentPaid(orderID)
+	}); err != nil {
+		return nil, err
+	}
+
+	order, err = s.orderRepo.FindByIDAndUserID(orderID, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	response := buildOrderResponse(*order)
+	return &response, nil
+}
+
 func isAllowedPaymentMethod(method string) bool {
 	return method == "gopay" ||
 		method == "bank_transfer" ||
