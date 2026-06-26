@@ -81,6 +81,31 @@ func (h *OrderHandler) GetOrderDetail(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": order})
 }
 
+func (h *OrderHandler) MarkPaymentPaid(c *gin.Context) {
+	userID, err := getUserIDFromContext(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Token tidak valid"})
+		return
+	}
+
+	orderID, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "ID order tidak valid"})
+		return
+	}
+
+	order, err := h.orderService.MarkPaymentPaid(userID, uint(orderID))
+	if err != nil {
+		writeOrderError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Pembayaran berhasil dikonfirmasi",
+		"data":    order,
+	})
+}
+
 func writeOrderError(c *gin.Context, err error) {
 	switch {
 	case errors.Is(err, services.ErrInvalidPaymentMethod), errors.Is(err, services.ErrCartEmpty):
